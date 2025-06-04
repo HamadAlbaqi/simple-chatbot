@@ -1,19 +1,26 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
 @app.post("/api/messages")
 async def messages(request: Request):
     data = await request.json()
-    user_input = data.get("text", "")
+    print("Incoming:", data)
 
-    answer = "Hamad is the best"
-    full_answer = user_input + answer
+    # Extract user text
+    user_text = data.get("text", "")
+    reply_text = f"You said: {user_text} - Hamad is the best!"
 
-    return {
+    # Build reply
+    reply = {
         "type": "message",
-        "text": full_answer
+        "text": reply_text
     }
+
+    print(reply)
+
+    return JSONResponse(content=reply)
 
 # python -m uvicorn main:app --port 3978 --host localhost
 # .\cloudflared.exe tunnel --url http://localhost:3978 --protocol h2mux
