@@ -1,5 +1,5 @@
+import requests
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
@@ -8,19 +8,17 @@ async def messages(request: Request):
     data = await request.json()
     print("Incoming:", data)
 
-    # Extract user text
-    user_text = data.get("text", "")
-    reply_text = f"You said: {user_text} - Hamad is the best!"
+    service_url = data["serviceUrl"]
+    conversation_id = data["conversation"]["id"]
+    reply_to_url = f"{service_url}v3/conversations/{conversation_id}/activities"
 
-    # Build reply
-    reply = {
+    reply_activity = {
         "type": "message",
-        "text": reply_text
+        "text": f"You said: {data.get('text')} - Hamad is the best!"
     }
 
-    print(reply)
+    # For now — NO auth → will likely need bearer token for production
+    response = requests.post(reply_to_url, json=reply_activity)
+    print("Reply response:", response.status_code, response.text)
 
-    return JSONResponse(content=reply)
-
-# python -m uvicorn main:app --port 3978 --host localhost
-# .\cloudflared.exe tunnel --url http://localhost:3978 --protocol h2mux
+    return {}
